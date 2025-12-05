@@ -145,3 +145,4 @@ if prompt := st.chat_input("Ask for a movie recommendation..."):
 
     # Save to history
     st.session_state.messages.append({"role": "assistant", "content": response, "poster": poster_url})
+
