@@ -2,8 +2,8 @@
 
 **Cine-Chat** is a Retrieval-Augmented Generation (RAG) application that provides context-aware movie recommendations. Unlike traditional keyword search, it uses **Semantic Vector Search** to understand the *meaning* of a user's request (e.g., "sad movies about space") and generates explained recommendations using **Llama 3**.
 
-🔗 **Live Demo:** [Click Here to Chat!](https://share.streamlit.io/YOUR_GITHUB_USERNAME/cine-chat/main)  
-*(Replace with your actual Streamlit Cloud link)*
+🔗 **Live Demo:** [Click Here to Chat!](https://cine-chat-project-kgbfgzobejbj2dcmp3tnk5.streamlit.app/)  
+
 
 ---
 
@@ -40,7 +40,7 @@ To run this project on your own machine:
 
 1.  **Clone the repository**
     ```bash
-    git clone [https://github.com/YOUR_USERNAME/cine-chat.git](https://github.com/YOUR_USERNAME/cine-chat.git)
+    git clone [https://github.com/MrPrabhathPeri/cine-chat.git](https://github.com/MrPrabhathPeri/cine-chat.git)
     cd cine-chat
     ```
 
@@ -52,7 +52,7 @@ To run this project on your own machine:
 3.  **Set up API Keys**
     Create a `.streamlit/secrets.toml` file and add your keys:
     ```toml
-    GROQ_API_KEY = "your_groq_key"
+    GROQ_API_KEY = "your_groq_key" 
     OMDB_API_KEY = "your_omdb_key"
     ```
 
