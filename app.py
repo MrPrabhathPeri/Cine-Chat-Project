@@ -1,42 +1,18 @@
+%%writefile app.py
 import streamlit as st
 import pandas as pd
 import chromadb
 from chromadb.utils import embedding_functions
 import os
 from groq import Groq
-import requests
 
 # --------------------------------------------------------------
 # PAGE CONFIGURATION
 # --------------------------------------------------------------
-st.set_page_config(page_title="Cine-Chat", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="Cine-Chat", page_icon="🎬")
 
 st.title("🎬 Cine-Chat: The AI Movie Expert")
 st.caption("Powered by Llama 3.3 & RAG")
-
-# --------------------------------------------------------------
-# HELPER FUNCTIONS (OMDb Version)
-# --------------------------------------------------------------
-def fetch_poster(movie_title):
-    """
-    Searches OMDb for the movie title and returns the poster URL.
-    """
-    try:
-        # We use st.secrets to keep the key safe
-        api_key = st.secrets["OMDB_API_KEY"]
-        
-        # OMDb API Request (Using 't=' for Title Search)
-        url = f"http://www.omdbapi.com/?t={movie_title}&apikey={api_key}"
-        response = requests.get(url)
-        data = response.json()
-        
-        # Check if a poster exists in the response
-        if 'Poster' in data and data['Poster'] != 'N/A':
-            return data['Poster']
-        else:
-            return None
-    except:
-        return None
 
 # --------------------------------------------------------------
 # SETUP (CACHED)
@@ -46,8 +22,7 @@ def load_resources():
     try:
         GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
     except:
-        st.error("GROQ_API_KEY not found in secrets!")
-        st.stop()
+        GROQ_API_KEY = "YOUR_GROQ_API_KEY_HERE"  # <--- PASTE KEY HERE
 
     client = Groq(api_key=GROQ_API_KEY)
 
@@ -93,36 +68,26 @@ client, collection = load_resources()
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "I am a movie expert. Ask me anything!"}]
 
-# Display History with Posters
 for msg in st.session_state.messages:
-    if msg["role"] == "assistant":
-        col1, col2 = st.columns([1, 4]) # 1 part image, 4 parts text
-        with col1:
-            # Check if this message has a poster stored
-            if "poster" in msg and msg["poster"]:
-                st.image(msg["poster"], width=130)
-        with col2:
-            st.write(msg["content"])
-    else:
-        st.chat_message("user").write(msg["content"])
+    st.chat_message(msg["role"]).write(msg["content"])
 
-# Handle Input
+# THIS WAS THE BROKEN LINE - I MADE IT SHORTER TO BE SAFE
 if prompt := st.chat_input("Ask for a movie recommendation..."):
     st.chat_message("user").write(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # RAG Retrieval
-    results = collection.query(query_texts=[prompt], n_results=1) 
-    top_movie = results['metadatas'][0][0]['title']
-    top_plot = results['documents'][0][0]
+    results = collection.query(query_texts=[prompt], n_results=3)
+    
+    context_text = ""
+    for i, doc in enumerate(results['documents'][0]):
+        title = results['metadatas'][0][i]['title']
+        context_text += f"Movie: {title}\nPlot: {doc}\n\n"
 
-    # Generate Answer
     system_prompt = f"""
     You are a movie expert. The user wants a recommendation.
-    The best match is: {top_movie}.
-    Plot: {top_plot}.
-    
-    Recommend this movie and explain why it fits the user's request.
+    Here are 3 relevant movies:
+    {context_text}
+    Recommend the best one and explain why.
     """
 
     chat_completion = client.chat.completions.create(
@@ -131,18 +96,5 @@ if prompt := st.chat_input("Ask for a movie recommendation..."):
     )
     
     response = chat_completion.choices[0].message.content
-    
-    # Fetch Poster using OMDb
-    poster_url = fetch_poster(top_movie)
-    
-    # Display Result
-    col1, col2 = st.columns([1, 4])
-    with col1:
-        if poster_url:
-            st.image(poster_url, width=130)
-    with col2:
-        st.write(response)
-
-    # Save to history
-    st.session_state.messages.append({"role": "assistant", "content": response, "poster": poster_url})
-
+    st.chat_message("assistant").write(response)
+    st.session_state.messages.append({"role": "assistant", "content": response})
