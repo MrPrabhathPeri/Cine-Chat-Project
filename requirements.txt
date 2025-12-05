@@ -3,3 +3,4 @@ chromadb
 groq
 pandas
 sentence-transformers
+requests
