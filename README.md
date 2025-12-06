@@ -40,7 +40,7 @@ To run this project on your own machine:
 
 1.  **Clone the repository**
     ```bash
-    git clone [https://github.com/MrPrabhathPeri/cine-chat.git](https://github.com/MrPrabhathPeri/cine-chat.git)
+    git clone [https://github.com/MrPrabhathPeri/Cine-Chat-Project.git](https://github.com/MrPrabhathPeri/Cine-Chat-Project.git)
     cd cine-chat
     ```
 
